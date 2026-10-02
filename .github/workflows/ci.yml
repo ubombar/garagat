@@ -26,8 +26,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
       - name: Real-network tests in a container (root, AF_PACKET)
         run: make integration
+      - name: Real-network tests on the host (root, AF_PACKET)
+        run: |
+          go test -c -tags integration -o link.test ./link/
+          sudo ./link.test -test.v -test.run Integration
 
   integration-macos:
     runs-on: macos-latest
@@ -36,9 +43,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Real-network tests on lo0 (root, BPF)
+      - name: Real-network tests (root, BPF)
         run: |
+          go test -c -tags integration -o link.test ./link/
           go test -c -tags integration -o prober.test ./prober/
+          sudo ./link.test -test.v -test.run Integration
           sudo ./prober.test -test.v -test.run Integration
 
   docker:
