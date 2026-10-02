@@ -98,7 +98,14 @@ func TestIntegrationGateway(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	rows := readCSV(t, out.String())
+	// Echo replies cannot be validated, so late replies to the system ping
+	// above may be captured too: keep the replies to our probes.
+	var rows []map[string]string
+	for _, r := range readCSV(t, out.String()) {
+		if r["probe_src_port"] == "24000" || r["probe_src_port"] == "24001" {
+			rows = append(rows, r)
+		}
+	}
 	if len(rows) != 2 {
 		t.Fatalf("got %d replies, want 2", len(rows))
 	}
@@ -108,9 +115,6 @@ func TestIntegrationGateway(t *testing.T) {
 		}
 		if r["probe_ttl"] != "64" && r["probe_ttl"] != "63" {
 			t.Errorf("probe_ttl %s", r["probe_ttl"])
-		}
-		if r["probe_src_port"] != "24000" && r["probe_src_port"] != "24001" {
-			t.Errorf("probe_src_port %s", r["probe_src_port"])
 		}
 	}
 	if stats.Link.Received < 2 {
