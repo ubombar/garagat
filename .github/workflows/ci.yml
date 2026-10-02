@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Lint
+        run: make lint
+      - name: Unit tests
+        run: make test
+      - name: Cross-compile without cgo
+        run: make cross
+
+  integration-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Real-network tests in a container (root, AF_PACKET)
+        run: make integration
+
+  integration-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Real-network tests on lo0 (root, BPF)
+        run: |
+          go test -c -tags integration -o prober.test ./prober/
+          sudo ./prober.test -test.v -test.run Integration
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t garagat .
+      - name: Smoke test
+        run: docker run --rm garagat --help
