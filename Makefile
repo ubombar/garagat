@@ -25,7 +25,7 @@ cross:
 
 # Runs the real-network tests as root in a Linux container.
 integration:
-	docker run --rm -v "$(CURDIR)":/src -w /src golang:1.26 go test -count=1 -tags integration -v -run Integration ./link/ ./prober/
+	docker run --rm -v "$(CURDIR)":/src -w /src golang:1.26 sh -c "apt-get -qq update && apt-get -qq install -y iputils-ping >/dev/null && go test -count=1 -tags integration -v -run Integration ./link/ ./prober/"
 
 docker:
 	docker build -t garagat .

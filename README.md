@@ -166,7 +166,7 @@ sudo go run ./examples/yarrp -i targets.txt -r 1000 -o output.yrp
 | Linux | `AF_PACKET` raw socket, kernel BPF filter, `SO_TIMESTAMPNS` timestamps, `PACKET_STATISTICS` | `/proc/net/route`, `/proc/net/ipv6_route` |
 | macOS, FreeBSD | `/dev/bpf` with `BIOCSETF`, `BIOCSHDRCMPLT`, kernel timestamps, `BIOCGSTATS` | routing socket (`golang.org/x/net/route`) |
 
-Ethernet, BSD loopback (`DLT_NULL`) and raw IP links are supported. On Linux the kernel does not answer packets injected on `lo` with a packet socket, so probing `127.0.0.1` through `lo` gets no replies; this is also true for caracal.
+Ethernet, BSD loopback (`DLT_NULL`) and raw IP links are supported. Linux and macOS do not answer probes injected on the loopback interface (`lo`, `lo0`), so probing `127.0.0.1` through it gets no replies; capturing on it works. This is also true for caracal.
 
 ## Differences from caracal
 

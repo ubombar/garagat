@@ -33,6 +33,7 @@ jobs:
         run: make integration
       - name: Real-network tests on the host (root, AF_PACKET)
         run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq iputils-ping
           go test -c -tags integration -o link.test ./link/
           sudo ./link.test -test.v -test.run Integration
 

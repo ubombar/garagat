@@ -13,6 +13,7 @@ import (
 	"bytes"
 	"context"
 	"os"
+	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
@@ -29,11 +30,12 @@ func loopback() string {
 	return "lo0"
 }
 
-// Linux does not answer packets injected with AF_PACKET on the loopback
-// interface, so this test only runs on macOS and FreeBSD.
+// Neither Linux nor macOS answer packets injected on the loopback interface
+// (AF_PACKET on lo, BPF on lo0), so this test only runs when
+// GARAGAT_LOOPBACK is set, for systems that do.
 func TestIntegrationLoopback(t *testing.T) {
-	if runtime.GOOS == "linux" {
-		t.Skip("Linux does not process packets injected on lo")
+	if os.Getenv("GARAGAT_LOOPBACK") == "" {
+		t.Skip("set GARAGAT_LOOPBACK=1 to probe the loopback interface")
 	}
 	var out, logs bytes.Buffer
 	cfg := DefaultConfig()
@@ -77,6 +79,9 @@ func TestIntegrationGateway(t *testing.T) {
 	v4, _, err := neighbors.DefaultRoutes()
 	if err != nil || !v4.Gateway.IsValid() {
 		t.Skip("no IPv4 default gateway")
+	}
+	if out, err := exec.Command("ping", "-c", "2", v4.Gateway.String()).CombinedOutput(); err != nil {
+		t.Skipf("the gateway does not answer ping: %v\n%s", err, out)
 	}
 	var out, logs bytes.Buffer
 	cfg := DefaultConfig()
