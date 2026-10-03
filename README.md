@@ -123,7 +123,7 @@ garagat is stateless: everything needed to match a reply to its probe is carried
 - The send time, in tenths of milliseconds modulo 65535, is in the ICMP sequence number or in the UDP checksum (again kept valid by the payload bytes). The RTT is computed from the capture time of the reply.
 - For IPv4 the IP ID field holds a checksum of the caracal ID, destination address, source port and TTL. Time exceeded and destination unreachable replies whose quoted IP ID does not match are dropped, unless `--no-integrity-check` is given. Dropped packets are still written to `--output-file-pcap`.
 
-The probes are byte-for-byte identical to caracal's for the same inputs (this is tested against the packets in caracal's test captures), including the IP ID, so replies to garagat and caracal probes can be validated by either tool with the same `--caracal-id`.
+The probes are byte-for-byte identical to caracal's for the same inputs (this is tested against the packets in caracal's test captures, and live against caracal in [docs/compatibility.md](docs/compatibility.md)), including the IP ID, so replies to garagat and caracal probes can be validated by either tool with the same `--caracal-id`.
 
 ## Library
 

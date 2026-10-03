@@ -1,7 +1,7 @@
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X main.version=$(VERSION)
 
-.PHONY: build test lint bench cross integration docker clean
+.PHONY: build test lint bench cross integration docker clean compare
 
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags "$(LDFLAGS)" -o bin/garagat ./cmd/garagat
@@ -32,3 +32,9 @@ docker:
 
 clean:
 	rm -rf bin
+
+# Compares garagat with caracal on the same probes (see docs/compatibility.md).
+# Needs a caracal-local image built from a caracal checkout.
+compare:
+	docker build -f compat/Dockerfile -t garagat-compat .
+	docker run --rm garagat-compat
